@@ -1,12 +1,11 @@
-import streamlit as st
+﻿import streamlit as st
 
-# Example tool: reverse text
-def reverse_text(text):
-    return text[::-1]
+st.title("Drone Photogrammetry Toolbox 🛠️")
+st.write("Select a tool from the sidebar to get started.")
 
-st.title("My First Public Python Tool 🚀")
-
-user_input = st.text_input("Enter some text:")
-if st.button("Run Tool"):
-    result = reverse_text(user_input)
-    st.success(f"Result: {result}")
+st.markdown("""
+### Included tools:
+1. Overlap & Sidelap Recommender  
+2. EXIF Consistency Auditor  
+3. Flight Log Merger  
+""")
