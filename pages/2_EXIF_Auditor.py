@@ -1,5 +1,6 @@
 ﻿import streamlit as st
 import exifread
+import re
 
 def exif_audit_tool():
     st.subheader("EXIF Consistency Auditor")
@@ -11,24 +12,22 @@ def exif_audit_tool():
         for file in uploaded_files:
             tags = exifread.process_file(file, details=False)
 
-            # Log all available EXIF keys so we can inspect DJI files
-            st.write(f"### Keys found in {file.name}:")
-            st.json(list(tags.keys()))  # print keys in a clean JSON view
+            # Log all keys + values for debugging
+            st.write(f"### EXIF dump for {file.name}:")
+            st.json({k: str(v) for k, v in tags.items()})
 
-            # Try multiple keys, since drones label them differently
-            possible_keys = ["GPS GPSAltitude", "GPSAltitude", "EXIF GPS GPSAltitude"]
+            # Look for any key containing "Altitude"
             alt_value = None
-            for key in possible_keys:
-                if key in tags:
-                    alt_value = tags[key]
+            for key, val in tags.items():
+                if re.search("Altitude", key, re.IGNORECASE):
+                    alt_value = val
                     break
 
             if alt_value:
                 try:
-                    # Some values are ratios like 710/1 → convert to float
                     altitudes.append(float(str(alt_value)))
                 except Exception:
-                    st.warning(f"Could not parse altitude for {file.name}")
+                    st.warning(f"Could not parse altitude for {file.name}: {alt_value}")
 
         if altitudes:
             st.write("### Sample Altitudes:")
@@ -38,6 +37,6 @@ def exif_audit_tool():
             else:
                 st.success("No major EXIF altitude jumps detected.")
         else:
-            st.warning("No GPS altitude data found in uploaded images.")
+            st.warning("No altitude-related EXIF tags found in uploaded images.")
 
 exif_audit_tool()
